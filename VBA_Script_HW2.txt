@@ -1,0 +1,137 @@
+' Goal: organize a table on each sheet: Tickers, Yearly Change, Percent Change, and Total Stock Volume
+'   1. Create Headers on all sheets - DONE
+'   2. Create a summary of Tickers and Total Volume for the sheet - DONE
+'   3. Calculate the Yearly Change and Percent Change by defining the Opening price, Closing Price, ticker count and diff - DONE
+'   4. Apply conditional formatting
+'
+'
+'
+
+Sub Stock_Summary_v2()
+
+
+'Setup loop through all sheets
+
+For Each ws In Worksheets
+
+''''CREATE TABLE HEADERS'''''
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+
+    'Create a variable to hold the Worksheet Name, Last Row
+    Dim WorksheetName As String
+    WorksheetName = ws.Name
+    
+    'Determine the Last Row
+    Dim lastrow As Long
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+
+    
+'''''DEFINE THE VARIABLES IN RAW DATA'''''
+
+    'Set an initial variable for holding the ticker
+    Dim Ticker As String
+
+    'Set an initial Variable for holding the total volume per ticker
+    Dim Ticker_Vol As LongLong
+    Ticker_Vol = 0
+
+    'Keep track of the location for each Ticker symbol in the summary table
+    Dim Summary_Table_Row As Integer
+    Summary_Table_Row = 2
+
+    'Define opening price at beginning of year. This would be the 1st instance of open
+    Dim Opening_Price As Double
+
+    'Define closing price at the end of the year. This would be the last instance of close
+    Dim Closing_Price As Double
+    
+    'Define the difference between the Opening_Price and Closing_Price
+    Dim Diff As Double
+
+    'Define a Count of the occurences of each Ticker
+    Dim Ticker_Count As Double
+    
+
+'''''LOOP THROUGH THE DATA ON EACH SHEET '''''
+
+    Dim i As Long
+    For i = 2 To lastrow
+    
+        'check if we are still within the same ticker, if it is not...
+        If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        
+        'Set the Ticker Symbol
+        Ticker = ws.Cells(i, 1).Value
+        
+        'Add to the Ticker Volume
+        Ticker_Vol = Ticker_Vol + ws.Cells(i, 7).Value
+        
+        'Set the Ticker Closing_Price for the year
+        Closing_Price = ws.Cells(i, 6).Value
+        
+        'Set the Ticker Opening_Price for the year
+        Opening_Price = ws.Cells(i - Ticker_Count, 3).Value
+                           
+        '''Print the Ticker Symbol in the Summary Table
+        ws.Range("I" & Summary_Table_Row).Value = Ticker
+        
+        '''Print the Ticker Volume sum to the Summary Table
+        ws.Range("L" & Summary_Table_Row).Value = Ticker_Vol
+        
+        '''Print the Yearly Change in the Ticker Price
+        Dim Yearly_Change As Double
+        Yearly_Change = (Opening_Price - Closing_Price) * -1
+        ws.Range("J" & Summary_Table_Row).Value = Yearly_Change
+            If Yearly_Change > 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+            ElseIf Yearly_Change < 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+            End If
+            
+        
+        '''Print the Percent Change in the Ticker Price
+        Dim Percent_Change As Double
+            If Opening_Price = 0 Then
+            Percent_Change = 0
+            Else
+            Percent_Change = (Yearly_Change / Opening_Price)
+            End If
+        ws.Range("K" & Summary_Table_Row).Value = Percent_Change
+        
+            'Before the next i, add 1 to the summary table row
+            Summary_Table_Row = Summary_Table_Row + 1
+        
+            'Before the next i, reset the Ticker Volume to 0
+            Ticker_Vol = 0
+
+            'Before next i, reset the Ticker Count to 0
+            Ticker_Count = 0
+        
+        'If the cell following the Ticker symbol is the same...
+        Else
+        
+            'Add to the total
+            Ticker_Vol = Ticker_Vol + ws.Cells(i, 7).Value
+
+            'Add to the count of same ticker
+            Ticker_Count = Ticker_Count + 1
+        
+        
+        
+            'Formatting Percent Change as a Percent
+            ws.Cells(i, 11).Value = Format(Percent_Change, "Percent")
+            
+        
+        
+        End If
+    
+    Next i
+    
+Next ws
+
+
+End Sub
