@@ -2,7 +2,7 @@
 '   1. Create Headers on all sheets - DONE
 '   2. Create a summary of Tickers and Total Volume for the sheet - DONE
 '   3. Calculate the Yearly Change and Percent Change by defining the Opening price, Closing Price, ticker count and diff - DONE
-'   4. Apply conditional formatting
+'   4. Apply conditional formatting - DONE
 '
 '
 '
